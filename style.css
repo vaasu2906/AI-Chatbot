@@ -14,16 +14,25 @@
     --secondary-hover-color:#333e58;
     --scrollbar-color:#626a7f;
 }
+body.light-theme{
+    --text-color:#090c13;
+    --subheading-color:#7b8cae;
+    --palceholder-color:#606982;
+    --primary-color:#f3f7ff;
+    --secondary-color:#dce6f9;
+    --secondary-hover-color:#d2ddf2;
+    --scrollbar-color:#a2aac2;
+}
 body{
     color:var(--text-color);
     background: var(--primary-color);
 }
 .container{
     padding: 32px 0 60px;
+    overflow-y:auto ;
+    max-height: calc(100vh -127vh);
 }
-.container .app-header,
-.container .suggestions,
-.container .prompt-wrapper {
+.container :where(.app-header,.suggestions,.prompt-wrapper,.disclaimer-text){
   margin: 0 auto;
   width: 100%;
   padding: 0 20px;
@@ -54,7 +63,7 @@ body{
     overflow-x: auto;
     scrollbar-width: none;
 }
-.container :is(.app-header, .suggestions){
+body.chats-active .container :where(.app-header, .suggestions){
     display: none;
 }
 .suggestions .suggestions-items{
@@ -101,14 +110,68 @@ body{
 .suggestions .suggestions-items:nth-child(4) span{
     color: #6f42c1;
 }
+.container .chats-container{
+  display: flex;
+  gap: 11px;
+  align-items: center;
+}
+.chats-container .bot-message .avatar{
+  height: 43px;
+  width: 43px;
+  flex-shrink: 0;
+  padding: 6px;
+  align-self: flex-start;
+  margin-right: -7px;
+  border-radius: 50%;
+  background: var(--secondary-color);
+  border: 1px solid var(--secondary-hover-color);
+}
+.chats-container .bot-message.loading .avatar{
+  animation: rotate 3s linear infinite;
+}
+@keyframes rotate{
+  100%{
+    transform: rotate(360deg);
+  }
+}
+.chats-container .message .message-text{
+  padding: 3px 16px;
+  word-wrap: break-word;
+  white-space:pre-line;
+}
+.chats-container .bot-message{
+  margin: 9px auto;
+}
+.chats-container .user-message{
+  flex-direction: column;
+  align-items: center;
+}
+.chats-container .user-message .message-text{
+  padding: 12px 16px;
+  max-width: 75%;
+  border-radius: 13px 3px 13px 13px ;
+}
+.chats-container .user-message .file-attachment{
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  padding: 10p;
+  margin-top: -7px;
+  border-radius: 13px 3px 13px 13px;
+  background: var(--secondary-color);
+}
+.chats-container .user-message.file-attachment span{
+  color: #1d7efd;
+}
+
 .prompt-container {
   position: fixed;
   bottom: 0;
   left: 0;
   width: 100%;
   background: var(--primary-color);
-  padding: 12px 20px;
-  border-top: 1px solid var(--secondary-color);
+  padding: 16px 0;
+  /* border-top: 1px solid var(--secondary-color); */
 }
 
 .prompt-container .prompt-wrapper,
@@ -119,29 +182,13 @@ body{
   height: 56px;
   align-items: center;
 }
-/* .prompt-wrapper {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  width: 100%;
-}
-.prompt-form {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  border-radius: 130px;
-  background: var(--secondary-color);
-  padding: 0 10px;
-} */
- 
 .prompt-wrapper .prompt-form{
     width: 100%;
     height: 100%;
     border-radius: 130px;
     background: var(--secondary-color);
 } 
-
+ 
 .prompt-form .prompt-input{
     height: 100%;
     width: 100%;
@@ -171,10 +218,19 @@ body{
   transition: 0.3s ease;
 }
 
-.prompt-wrapper button:hover:not(#send-prompt-btn) {
+.prompt-wrapper :is(button:hover, .file-icon ,#cancel-file-btn) {
   background: var(--secondary-hover-color);
 }
+.prompt-form .prompt-actions{
+  gap: 5px;
+  margin-right: 7px;
+}
 
+.prompt-wrapper .prompt-form :where(.file-upload-wrapper, button ,img){
+  position: relative;
+  height: 45px;
+  width: 45px;
+}
 .prompt-form #send-prompt-btn {
   color: #fff;
   background: #1d7efd;
@@ -183,10 +239,41 @@ body{
 }
 .prompt-form .prompt-input:valid ~ .prompt-actions #send-prompt-btn {
     display: block;
-
-
 }
 
+.prompt-form #send-prompt-btn:hover{
+  background: #0264e3;
+}
+
+.prompt-form .file-upload-wrapper :where(button,img){
+  position: absolute;
+  border-radius: 50%;
+  object-fit: cover;
+  display: none;
+}
+.prompt-form .file-upload-wrapper #add-file-btn,
+.prompt-form .file-upload-wrapper.active.img-attached img,
+.prompt-form .file-upload-wrapper.active.file-attached .file-icon,
+.prompt-form .file-upload-wrapper.active:hover #cancel-file-btn{
+  display: block;
+}
+
+.prompt-form .file-upload-wrapper.active #add-file-btn{
+  display: none;
+}
+.prompt-form :is(#cancel-file-btn, #stop-response-bth:hover){
+  color: #d62939;
+}
+.prompt-form .fileicon{
+  color: #1b6be2;
+}
+.prompt-form #stop-response-btn,
+body.bot-responding .prompt-form .file-upload-wrapper{
+  display: none;
+}
+body.bot-responding .prompt-form #stop-response-btn{
+  display: block;
+}
 .prompt-form #send-prompt-btn:hover {
   background: #1b6be2;
 }
@@ -197,12 +284,27 @@ body{
   padding: 16px 20px 0;
   margin-bottom: 10px;
   color: var(--palceholder-color);
-}.prompt-form .prompt-actions{
-    margin-right: 7px;
-    gap: 5px;
 }
+
+
+
 .prompt-form .prompt-actions button{
     height: 45px;
     width: 45px;
+}
 
+@media (max-width: 768px){
+  .container{
+    padding: 20px 0 100px;
+  }
+  .app-header :is(.heading, .sub-heading){
+    font-size: 2rem;
+    line-height: 1.4;
+  }
+  .prompt-form .file-upload-wrapper.active #cancel-file-btn{
+    opacity: 0;
+  }
+  .prompt-wrapper.hide-controls :where(#theme-toggle-btn, #delete-chats-btn){
+    display: none;
+  }
 }
