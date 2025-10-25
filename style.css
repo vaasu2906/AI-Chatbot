@@ -1,0 +1,208 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap');
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: "poppins",serif;
+}
+:root{
+    --text-color:#edf3ff;
+    --subheading-color:#97a7ca;
+    --palceholder-color:#c3cdde;
+    --primary-color:#101623;
+    --secondary-color:#283045;
+    --secondary-hover-color:#333e58;
+    --scrollbar-color:#626a7f;
+}
+body{
+    color:var(--text-color);
+    background: var(--primary-color);
+}
+.container{
+    padding: 32px 0 60px;
+}
+.container .app-header,
+.container .suggestions,
+.container .prompt-wrapper {
+  margin: 0 auto;
+  width: 100%;
+  padding: 0 20px;
+  min-width: 980px;
+}
+.container .app-header{
+    margin-top: 4vh;
+
+}
+.app-header .heading{
+    font-size: 3rem;
+    width: fit-content;
+    background: linear-gradient(to right,#1d7efd,#8f6fff);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+.app-header .sub-heading{
+    font-size: 2.6rem;
+    margin-top: -px;
+    color: var(--subheading-color);
+}
+.container .suggestions{
+    display: flex;
+    gap: 15px;
+    margin-top: 9.5vh;
+    list-style: none;
+    overflow-x: auto;
+    scrollbar-width: none;
+}
+.container :is(.app-header, .suggestions){
+    display: none;
+}
+.suggestions .suggestions-items{
+  padding: 18px;
+  width: 228px;
+  flex-shrink: 0;
+  display: flex;
+  cursor: pointer;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: flex-end;
+  border-radius: 12px;
+  background: var(--secondary-color);
+  transition: 0.3s ease;
+}
+.suggestions .suggestions-items:hover{
+    background: var(--secondary-hover-color);
+}
+.suggestions .suggestions-items .text{
+    font-size: 1.1rem;
+}
+.suggestions .suggestions-items span{
+    height: 45px;
+    width: 45px;
+    margin-top: 35px;
+    display: flex;
+    align-self: flex-end;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    color: #1d7efd;
+    background: var(--primary-color);
+}
+
+
+.suggestions .suggestions-items:nth-child(2) span{
+    color: #28a745;
+}
+
+.suggestions .suggestions-items:nth-child(3) span{
+    color: #ffc107;
+}
+
+.suggestions .suggestions-items:nth-child(4) span{
+    color: #6f42c1;
+}
+.prompt-container {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background: var(--primary-color);
+  padding: 12px 20px;
+  border-top: 1px solid var(--secondary-color);
+}
+
+.prompt-container .prompt-wrapper,
+.prompt-container .prompt-form,
+.prompt-container .prompt-actions {
+  display: flex;
+  gap: 12px;
+  height: 56px;
+  align-items: center;
+}
+/* .prompt-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+}
+.prompt-form {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-radius: 130px;
+  background: var(--secondary-color);
+  padding: 0 10px;
+} */
+ 
+.prompt-wrapper .prompt-form{
+    width: 100%;
+    height: 100%;
+    border-radius: 130px;
+    background: var(--secondary-color);
+} 
+
+.prompt-form .prompt-input{
+    height: 100%;
+    width: 100%;
+    background: none;
+    outline: none;
+    border: none;
+    font-size: 1rem;
+    padding-left: 24px;
+    color: var(--text-color);
+}
+.prompt-form .prompt-input::placeholder{
+    color: var(--palceholder-color); 
+}
+.prompt-wrapper button {
+  width: 56px;
+  height: 56px;
+  border: none;
+  cursor: pointer;
+  border-radius: 50%;
+  background: var(--secondary-color);
+  color: var(--text-color);
+  font-size: 1.4rem;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: 0.3s ease;
+}
+
+.prompt-wrapper button:hover:not(#send-prompt-btn) {
+  background: var(--secondary-hover-color);
+}
+
+.prompt-form #send-prompt-btn {
+  color: #fff;
+  background: #1d7efd;
+  box-shadow: 0 0 10px rgba(29, 126, 253, 0.4);
+  display: none;
+}
+.prompt-form .prompt-input:valid ~ .prompt-actions #send-prompt-btn {
+    display: block;
+
+
+}
+
+.prompt-form #send-prompt-btn:hover {
+  background: #1b6be2;
+}
+
+.prompt-container .disclaimer-text {
+  text-align: center;
+  font-size: 0.9rem;
+  padding: 16px 20px 0;
+  margin-bottom: 10px;
+  color: var(--palceholder-color);
+}.prompt-form .prompt-actions{
+    margin-right: 7px;
+    gap: 5px;
+}
+.prompt-form .prompt-actions button{
+    height: 45px;
+    width: 45px;
+
+}
