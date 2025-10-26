@@ -7,10 +7,10 @@ const fileUploadWrapper = document.querySelector(".file-upload-wrapper");
 const themeToggle = document.querySelector("#theme-toggle-btn");
 
 // API Setup
-const API_KEY = "AIzaSyC80SmDtk1hYZegCY-IflwdWM4DxfaNrc8";
+const API_KEY = "AIzaSyDpES7zo7wfkiUdLLj4RtZ2IBsK3QEX7KM";
 const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${API_KEY}`;
+let typingInterval,controller;
 
-let typingInterval, controller;
 const userData = { message: "", file: {} };
 const chatHistory = [];
 
@@ -23,57 +23,87 @@ function createMsgElement(content, ...classes) {
 }
 
 // Auto scroll
-const scrollToBottom = () => container.scrollTo({ top: container.scrollHeight, behavior: "smooth" });
 
-// Typing effect
+// Auto scroll
+
+const scrollToBottom = () => {
+ container.scrollTo({top: container.scrollHeight, behavior:"smooth"});
+};
+
 const typingEffect = (text, textElement, botMsgDiv) => {
   textElement.textContent = "";
-  const words = text.split(" ");
+  const words=text.split(" ");
   let wordIndex = 0;
 
   typingInterval = setInterval(() => {
     if (wordIndex < words.length) {
-      textElement.textContent += (wordIndex === 0 ? "" : " ") + words[wordIndex++];
+      textElement.textContent += (wordIndex === 0 ? "" : " ")+words[wordIndex++]
       scrollToBottom();
     } else {
       clearInterval(typingInterval);
       botMsgDiv.classList.remove("loading");
       document.body.classList.remove("bot-responding");
     }
-  }, 40);
+  }, 40); // adjust typing speed
 };
 
+
+//API Call
 // Generate bot response
 const genrateResponse = async (botMsgDiv) => {
   const textElement = botMsgDiv.querySelector(".message-text");
   controller = new AbortController();
 
-  chatHistory.push({
-    role: "user",
-    parts: [
-      { text: userMessage },
-      ...(userData.file.data
-        ? [{ inline_data: (({ fileName, isImage, ...rest }) => rest)(userData.file) }]
-        : [])
-    ]
-  });
-
+  // Add user message to chat history
+// THIS CODE IS WRONG
+chatHistory.push({
+  role: "user",
+  parts: [
+    { text: userData.message },
+    ...(userData.file.data
+      ? [
+          {
+            inline_data: { // <-- This extra object is the problem
+              fileName: userData.file.fileName,
+              mime_type: userData.file.mime_type,
+              data: userData.file.data,
+              isImage: userData.file.isImage,
+            },
+          },
+        ]
+      : []),
+  ],
+});
   try {
     const response = await fetch(API_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ contents: chatHistory }),
-      signal: controller.signal
+      signal: controller.signal,
     });
-    const data = await response.json();
-    if (!response.ok) throw new Error(data.error?.message || "API Error");
 
-    const responseText = data.candidates[0].content.parts[0].text.replace(/\*\*([^*]+)\*\*/g, "$1").trim();
+    const data = await response.json();
+    if (!response.ok)
+      throw new Error(data.error?.message || "API Error");
+
+    const responseText = data.candidates[0].content.parts[0].text
+      .replace(/\*\*([^*]+)\*\*/g, "$1")
+      .trim();
+
     typingEffect(responseText, textElement, botMsgDiv);
 
+    // Add model response to chat history
+    chatHistory.push({
+      role: "model",
+      parts: [{ text: responseText }],
+    });
+    console.log(chatHistory);
   } catch (error) {
     textElement.style.color = "#d62939";
-    textElement.textContent = error.name === "AbortError" ? "Response generation stopped." : error.message;
+    textElement.textContent =
+      error.name === "AbortError"
+        ? "Response generation stopped."
+        : error.message;
     botMsgDiv.classList.remove("loading");
     document.body.classList.remove("bot-responding");
   } finally {
@@ -81,10 +111,10 @@ const genrateResponse = async (botMsgDiv) => {
   }
 };
 
-// Form submission
+// Handle form submission
 const handleFormSubmit = (e) => {
   e.preventDefault();
-  userMessage = promptInput.value.trim();
+  const userMessage = promptInput.value.trim();
   if (!userMessage || document.body.classList.contains("bot-responding")) return;
 
   promptInput.value = "";
@@ -96,10 +126,9 @@ const handleFormSubmit = (e) => {
     <p class="message-text"></p>
     ${
       userData.file.data
-        ? (userData.file.isImage
-            ? `<img src="data:${userData.file.mime_type};base64,${userData.file.data}" class="img-attachment"/>`
-            : `<p class="file-attachment"><span class="material-symbols-rounded">description</span>${userData.file.fileName}</p>`
-          )
+        ? userData.file.isImage
+          ? `<img src="data:${userData.file.mime_type};base64,${userData.file.data}" class="img-attachment"/>`
+          : `<p class="file-attachment"><span class="material-symbols-rounded">description</span>${userData.file.fileName}</p>`
         : ""
     }
   `;
@@ -110,7 +139,7 @@ const handleFormSubmit = (e) => {
   scrollToBottom();
 
   setTimeout(() => {
-    const botMsgHTML = `<img src="images/gemini.png" class="avatar"><p class="message-text">Wait a sec...</p>`;
+    const botMsgHTML = `<img src="./images/gemini.png" class="avatar"><p class="message-text">Wait a sec...</p>`;
     const botMsgDiv = createMsgElement(botMsgHTML, "bot-message", "loading");
     chatsContainer.appendChild(botMsgDiv);
     scrollToBottom();
@@ -133,7 +162,12 @@ fileInput.addEventListener("change", () => {
     fileUploadWrapper.querySelector(".file-preview").src = e.target.result;
     fileUploadWrapper.classList.add("active", isImage ? "img-attached" : "file-attached");
 
-    userData.file = { fileName: file.name, data: base64String, mime_type: file.type, isImage };
+    userData.file = {
+      fileName: file.name,
+      data: base64String,
+      mime_type: file.type,
+      isImage,
+    };
   };
 });
 
@@ -143,11 +177,12 @@ document.querySelector("#cancel-file-btn").addEventListener("click", () => {
   fileUploadWrapper.classList.remove("active", "img-attached", "file-attached");
 });
 
+
 // Stop response
 document.querySelector("#stop-response-btn").addEventListener("click", () => {
   userData.file = {};
   controller?.abort();
-  clearInterval(typingInterval);
+  clearInterval(typingInterval); // <-- This will now work
   chatsContainer.querySelector(".bot-message.loading")?.classList.remove("loading");
   document.body.classList.remove("bot-responding");
 });
@@ -160,7 +195,7 @@ document.querySelector("#delete-chats-btn").addEventListener("click", () => {
 });
 
 // Suggestions click
-document.querySelectorAll(".suggestions-items").forEach(item => {
+document.querySelectorAll(".suggestions-items").forEach((item) => {
   item.addEventListener("click", () => {
     promptInput.value = item.querySelector(".text").textContent;
     promptForm.dispatchEvent(new Event("submit"));
