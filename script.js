@@ -9,6 +9,7 @@ const themeToggle = document.querySelector("#theme-toggle-btn");
 // API Setup
 const API_KEY = "AIzaSyDpES7zo7wfkiUdLLj4RtZ2IBsK3QEX7KM";
 const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${API_KEY}`;
+
 let typingInterval,controller;
 
 const userData = { message: "", file: {} };
@@ -22,7 +23,6 @@ function createMsgElement(content, ...classes) {
   return div;
 }
 
-// Auto scroll
 
 // Auto scroll
 
@@ -55,25 +55,11 @@ const genrateResponse = async (botMsgDiv) => {
   controller = new AbortController();
 
   // Add user message to chat history
-// THIS CODE IS WRONG
-chatHistory.push({
-  role: "user",
-  parts: [
-    { text: userData.message },
-    ...(userData.file.data
-      ? [
-          {
-            inline_data: { // <-- This extra object is the problem
-              fileName: userData.file.fileName,
-              mime_type: userData.file.mime_type,
-              data: userData.file.data,
-              isImage: userData.file.isImage,
-            },
-          },
-        ]
-      : []),
-  ],
-});
+chatHistory.push({ 
+   role: "user",
+   parts: [{text: userData.message }, ...(userData.file.data ?[{ inline_data: (({ fileName,isImage,...
+  rest})=>rest)(userData.file)}]:[])]
+   })  
   try {
     const response = await fetch(API_URL, {
       method: "POST",
@@ -115,24 +101,21 @@ chatHistory.push({
 const handleFormSubmit = (e) => {
   e.preventDefault();
   const userMessage = promptInput.value.trim();
-  if (!userMessage || document.body.classList.contains("bot-responding")) return;
-
+if ((!userMessage && !userData.file.data) || document.body.classList.contains("bot-responding")) return;
   promptInput.value = "";
   userData.message = userMessage;
-  document.body.classList.add("bot-responding");
+  document.body.classList.add("bot-responding","chats-active");
   fileUploadWrapper.classList.remove("active", "img-attached", "file-attached");
-
-  const userMsgHTML = `
-    <p class="message-text"></p>
-    ${
-      userData.file.data
-        ? userData.file.isImage
-          ? `<img src="data:${userData.file.mime_type};base64,${userData.file.data}" class="img-attachment"/>`
-          : `<p class="file-attachment"><span class="material-symbols-rounded">description</span>${userData.file.fileName}</p>`
-        : ""
-    }
-  `;
-
+const userMsgHTML = `
+    <p class="message-text"></p>`
+  //   ${
+  //     userData.file.data
+  //       ? userData.file.isImage
+  //         ? `<img src="data:${userData.file.mimeType};base64,${userData.file.data}" class="img-attachment"/>` // <-- Use mimeType
+  //         : `<p class="file-attachment"><span class="material-symbols-rounded">description</span>${userData.file.fileName}</p>`
+  //       : ""
+  //   }
+  // `;
   const userMsgDiv = createMsgElement(userMsgHTML, "user-message");
   userMsgDiv.querySelector(".message-text").textContent = userMessage;
   chatsContainer.appendChild(userMsgDiv);
@@ -152,6 +135,9 @@ fileInput.addEventListener("change", () => {
   const file = fileInput.files[0];
   if (!file) return;
 
+
+    console.log(file);
+
   const isImage = file.type.startsWith("image/");
   const reader = new FileReader();
   reader.readAsDataURL(file);
@@ -162,13 +148,10 @@ fileInput.addEventListener("change", () => {
     fileUploadWrapper.querySelector(".file-preview").src = e.target.result;
     fileUploadWrapper.classList.add("active", isImage ? "img-attached" : "file-attached");
 
-    userData.file = {
-      fileName: file.name,
-      data: base64String,
-      mime_type: file.type,
-      isImage,
-    };
-  };
+
+    // store file data in userData obj
+// NEW
+userData.file = { fileName: file.name,data: base64String, mimeType: file.type, isImage };  };
 });
 
 // Cancel file
@@ -184,7 +167,7 @@ document.querySelector("#stop-response-btn").addEventListener("click", () => {
   controller?.abort();
   clearInterval(typingInterval); // <-- This will now work
   chatsContainer.querySelector(".bot-message.loading")?.classList.remove("loading");
-  document.body.classList.remove("bot-responding");
+  document.body.classList.remove("bot-responding","chats-active");
 });
 
 // Delete chats
@@ -202,6 +185,12 @@ document.querySelectorAll(".suggestions-items").forEach((item) => {
   });
 });
 
+document.addEventListener("click",({target})=>{
+  const wrapper=document.querySelector(".prompt-wrapper");
+  const shouldHide=target.classList.contains("prompt-input")||(wrapper.classList.contains("hide-controls")&& (target.id==="add-file-btn" || target.id==="stop-response-btn"));
+  wrapper.classList.toggle("hide-controls",shouldHide)
+})
+
 // Theme toggle
 themeToggle.addEventListener("click", () => {
   const isLightTheme = document.body.classList.toggle("light-theme");
@@ -209,15 +198,19 @@ themeToggle.addEventListener("click", () => {
   themeToggle.textContent = isLightTheme ? "dark_mode" : "light_mode";
 });
 
+const isLightTheme=localStorage.getItem("themeColor")==="light_mode";
+document.body.classList.toggle("light-theme",isLightTheme);
+  themeToggle.textContent = isLightTheme ? "dark_mode" : "light_mode";
+
 // Apply saved theme on load
-const savedTheme = localStorage.getItem("themeColor");
-if (savedTheme === "light_mode") {
-  document.body.classList.add("light-theme");
-  themeToggle.textContent = "dark_mode";
-} else {
-  document.body.classList.remove("light-theme");
-  themeToggle.textContent = "light_mode";
-}
+// const savedTheme = localStorage.getItem("themeColor");
+// if (savedTheme === "light_mode") {
+//   document.body.classList.add("light-theme");
+//   themeToggle.textContent = "dark_mode";
+// } else {
+//   document.body.classList.remove("light-theme");
+//   themeToggle.textContent = "light_mode";
+// }
 
 // Event listeners
 promptForm.addEventListener("submit", handleFormSubmit);
