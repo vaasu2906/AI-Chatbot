@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Sign Up | Sigma AI</title>
+  <link rel="stylesheet" href="auth.css" />
+</head>
+<body>
+  <main class="auth-container">
+    <div class="card">
+      <h2 class="title">Create account</h2>
+      <form id="signup-form" class="auth-form" autocomplete="off">
+        <label class="input-label">
+          <span>Full Name</span>
+          <input type="text" id="signup-name" placeholder="Your full name" required />
+        </label>
+
+        <label class="input-label">
+          <span>Email</span>
+          <input type="email" id="signup-email" placeholder="you@example.com" required />
+        </label>
+
+        <label class="input-label">
+          <span>Password</span>
+          <input type="password" id="signup-password" placeholder="Choose a password" required />
+        </label>
+
+        <button class="btn" type="submit">Sign Up</button>
+        <p id="signup-error" class="error"></p>
+      </form>
+
+      <p class="foot">Already have an account? <a href="login.html">Login</a></p>
+    </div>
+  </main>
+
+  <!-- Signup JS (module) -->
+  <script type="module" src="auth-firebase.js" defer></script>
+</body>
+</html>

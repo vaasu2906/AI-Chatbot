@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Login | Sigma AI</title>
+  <link rel="stylesheet" href="auth.css" />
+</head>
+<body>
+  <main class="auth-container">
+    <div class="card">
+      <h2 class="title">Welcome back</h2>
+      <form id="login-form" class="auth-form" autocomplete="off">
+        <label class="input-label">
+          <span>Email</span>
+          <input type="email" id="login-email" placeholder="you@example.com" required />
+        </label>
+
+        <label class="input-label">
+          <span>Password</span>
+          <input type="password" id="login-password" placeholder="Your password" required />
+        </label>
+
+        <button class="btn" type="submit">Login</button>
+        <p id="login-error" class="error"></p>
+      </form>
+
+      <p class="foot">Don't have an account? <a href="signup.html">Sign up</a></p>
+    </div>
+  </main>
+
+  <!-- Login JS (module) -->
+  <script type="module" src="auth-login.js" defer></script>
+</body>
+</html>
