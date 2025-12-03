@@ -49,7 +49,6 @@ const typingEffect = (text, textElement, botMsgDiv) => {
 
 
 //API Call
-// Generate bot response
 const genrateResponse = async (botMsgDiv) => {
   const textElement = botMsgDiv.querySelector(".message-text");
   controller = new AbortController();
